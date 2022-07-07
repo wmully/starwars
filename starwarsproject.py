@@ -1,9 +1,8 @@
 import requests
-import json
 import pymongo
 import pprint
 
-pp=pprint.PrettyPrinter(indent=2)
+pp=pprint.PrettyPrinter()
 
 def get_data(query):
     resp = requests.get(query)
@@ -33,19 +32,23 @@ def get_pilot_name(url):
     else:
         return None
 
-ships=get_ships_list()
-print(f"LENGTH = {len(ships)}")
 
-pilot_dict={}
+## Function to return a dictionary of pilots : URL -> Pilot Name pairs
+def generate_pilot_dict(ships):
+    pdict={}
+    for s in ships:
+        if s.get("pilots"):
+            for p in s.get("pilots"):
+                if p not in pdict:  ### If this pilot has not already been fetched then go call the api
+                    name = get_pilot_name(p)
+                    pdict[p] = name
+    return pdict
 
-## Next to get all the pilots names by iterating over all the pilots in the ships list
-for s in ships:
-    if s.get("pilots"):
-        for p in s.get("pilots"):
-            if p not in pilot_dict:   ### If this pilot has not already been fetched then go call the api
-                name=get_pilot_name(p)
-                pilot_dict[p]=name
 
+shiplist = get_ships_list()
+print(f"LENGTH = {len(shiplist)}")
+
+pilot_dict = generate_pilot_dict(shiplist)
 print(pilot_dict)
 
 ## Now go search for each pilot in mongo and get the ObjectIDs
@@ -64,7 +67,7 @@ print ("--- PILOTOBJ DICT---")
 print (pilotobj_dict)
 
 ### Now we overwrite the ships list so that each ship's pilot array has the object ids.
-for s in ships:
+for s in shiplist:
     new_pilot_list=[]
     for p in s["pilots"]:
         pname=pilot_dict.get(p)
@@ -73,10 +76,13 @@ for s in ships:
     s["pilots"] = new_pilot_list
 
 print ("--- SHIPS LIST---")
-pp.pprint(ships)
+pp.pprint(shiplist)
+
+## IF collection has already existed we want to clear it out
+db.drop_collection("starships")
 
 ### Now write the newly-updated starships collection into mongo
-db.starships.insert_many(ships)
+db.starships.insert_many(shiplist)
 
 print ("--- SAVED TO MONGO ---")
 
