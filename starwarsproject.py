@@ -12,7 +12,7 @@ def get_data(query):
 ### Func to get all starships handling paging
 def get_ships_list():
     qry_ships="https://swapi.dev/api/starships"
-    bDone=False   # setting boolean variable for while loop
+    bDone=False     # setting boolean variable for while loop
     shipslist=[]    # creating an empty list which we will add to below
 
     while not bDone:
@@ -36,14 +36,14 @@ def generate_pilot_dict(ships):
     pdict={}
     for s in ships:
         for p in s.get("pilots"):
-            if p not in pdict:  ### If this pilot has not already been fetched then go call the api
-                name = get_pilot_name(p) ### using function to get th pilot name
-                pdict[p] = name ### adding pilot name to pilot dictionary
+            if p not in pdict:              # If this pilot has not already been fetched then go call the api
+                name = get_pilot_name(p)    # using function to get th pilot name
+                pdict[p] = name             # adding pilot name to pilot dictionary
     return pdict
 
 ### Go get all the ships
-shiplist = get_ships_list() ### assigning global variable shiplist to call for future functions
-print(f"LENGTH = {len(shiplist)}")  ### checking to see if count of ships matches
+shiplist = get_ships_list()                 # assigning global variable shiplist to call for future functions
+print(f"LENGTH = {len(shiplist)}")          # checking to see if count of ships matches
 
 ### get a dictionary with the pilot url key and matching name values from people api
 pilot_dict = generate_pilot_dict(shiplist)
@@ -56,10 +56,10 @@ db = client['starwars']
 ### Use another key-value dictionary for looking up the name to the objectid
 pilotobj_dict={}
 
-for pname in pilot_dict.values():                           ## the values gives me the list of pilot names
-    if pname not in pilotobj_dict:                          ## Skip any pilots we've looked up here before
-        pdoc = db.characters.find_one({"name": pname})      ## Go search the data collection for this plot by name
-        pilotobj_dict[pname]=pdoc.get("_id")                ## Get the Object Id for the pilot
+for pname in pilot_dict.values():                           # the values gives me the list of pilot names
+    if pname not in pilotobj_dict:                          # Skip any pilots we've looked up here before
+        pdoc = db.characters.find_one({"name": pname})      # Go search the data collection for this plot by name
+        pilotobj_dict[pname]=pdoc.get("_id")                # Get the Object Id for the pilot
 
 print ("--- PILOTOBJ DICT---")
 print (pilotobj_dict)
